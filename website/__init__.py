@@ -17,7 +17,7 @@ def create_app():
 
     app.register_blueprint(views, url_prefix='/')
 
-    from .models import Player, User, Note
+    from .models import Player
 
     create_database(app)
 

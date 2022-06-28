@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required, current_user
-from .models import Player, Note
+from .models import Player
 from . import db
 from .utils import slice_n_dice
 import json
@@ -24,6 +24,8 @@ def start():
     teamBlue_current_match.clear()
     players = Player.query.all()
     return render_template("start.html", players=players, current_players=current_players)
+
+
 ####################################################################
 
 
@@ -47,6 +49,8 @@ def new_player():
     players = Player.query.all()
     print(players)
     return render_template("new_player.html", players=players)
+
+
 ####################################################################
 
 
@@ -65,8 +69,10 @@ def delete_player():
 
     players = Player.query.all()
     return render_template("delete_player.html", players=players)
+
+
 #####################################################################
-#returning either the current_players list, or the start-page with modified teams
+# returning either the current_players list, or the start-page with modified teams
 
 
 @views.route('/team-building', methods=['GET', 'POST'])
@@ -96,8 +102,9 @@ def team_building():
     print("we are here, weirdly")
     players = Player.query.all()
     return render_template("start.html", players=players, current_players=current_players)
-#####################################################################
 
+
+#####################################################################
 
 
 @views.route('/versus', methods=['GET', 'POST'])
@@ -117,6 +124,7 @@ def versus():
 
     return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match)
 
+
 ####################################################################
 # currently only used for in versus.html, when a winner is declared
 
@@ -134,4 +142,6 @@ def update_stats():
 
     # we either have to re-render page here, or use fetch API
     return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match)
+
+
 #####################################################################
