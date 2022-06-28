@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Delete Player{% endblock %}
+########################################################
+{% block style %}
+        ul#menu li {display:inline-block; border: 2px solid steelblue; margin-right: 8px; margin-top: 8px; border-radius: 15px;}
+{% endblock %}
+########################################################
+{% block content %}
+    <br />
+    <h1 align="center">DELETE Player</h1>
+
+    <form method="POST">
+        <input
+          type="text"
+          class="form-control"
+          id="name"
+          name="name"
+          placeholder="Enter name"
+        />
+      <br />
+      <div align="center">
+        <button type="submit" class="btn btn-primary">Delete player</button>
+      </div>
+    </form>
+    <br />
+
+    <h4 align="left">Currently available players:</h4>
+    <br />
+    <ul id="menu">
+        {% if players %}
+            {% for player in players %}
+                <li class="list-group-item">
+                {{ player.name }}
+                </li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+{% endblock %}

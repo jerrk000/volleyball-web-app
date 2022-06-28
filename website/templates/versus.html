@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Versus{% endblock %}
+########################################################
+{% block style %}
+    * {
+  box-sizing: border-box;
+}
+
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  text-align: center;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+  }
+}
+{% endblock %}
+########################################################
+{% block content %}
+<br />
+
+<div class="row">
+  <div class="column" style="background-color: lightpink;">
+    <h2>Team Blue</h2>
+      {% for player in teamRed %}
+        <p>{{ player }}</p>
+      {% endfor %}
+    <form action="/update-stats" method="post">
+        <button class="btn btn-primary" style="background-color: indianred; border-color: palevioletred" name="newWin" value="winRed">Winner: Team Red</button>
+    </form>
+  </div>
+  <div class="column" style="background-color: aliceblue;">
+    <h2>Team Blue</h2>
+    {% for player in teamBlue %}
+        <p>{{ player }}</p>
+      {% endfor %}
+    <form action="/update-stats" method="post">
+        <button class="btn btn-primary" style="background-color: cornflowerblue" name="newWin" value="winBlue">Winner: Team Blue</button>
+    </form>
+  </div>
+</div>
+    <br />
+<div class="text-center">
+    <form action="/versus" method="get">
+        <button class="btn btn-primary btn-lg" style="background-color: grey; border-color: darkgrey" name="shuffle" value="shuffle">Shuffle</button>
+    </form>
+</div>
+{% endblock %}
