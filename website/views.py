@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required, current_user
 from .models import Player
 from . import db
-from .utils import slice_n_dice
+from .utils import slice_n_dice as snd
 import json
 
 views = Blueprint('views', __name__)
@@ -120,7 +120,8 @@ def versus():
         players = Player.query.filter(Player.name.notin_(current_players))
         return render_template("start.html", players=players, current_players=current_players)
 
-    # TODO implement function to find the x-best combination
+    global teamRed_current_match, teamBlue_current_match
+    teamRed_current_match, teamBlue_current_match = snd.make_teams(current_players, 0, 2)
 
     return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match)
 
