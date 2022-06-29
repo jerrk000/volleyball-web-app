@@ -31,10 +31,13 @@
 
 <div class="row">
   <div class="column" style="background-color: lightpink;">
-    <h2>Team Blue</h2>
+    <h2>Team Red</h2>
       {% for player in teamRed %}
         <p>{{ player }}</p>
       {% endfor %}
+      {%  if teamRed|length < teamBlue|length %}
+        <br \>
+      {% endif %}
     <form action="/update-stats" method="post">
         <button class="btn btn-primary" style="background-color: indianred; border-color: palevioletred" name="newWin" value="winRed">Winner: Team Red</button>
     </form>

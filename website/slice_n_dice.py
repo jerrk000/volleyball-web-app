@@ -1,3 +1,5 @@
+from .models import Player
+
 
 def make_teams(player_list, fairness_value, team_amount=2):
 
@@ -12,22 +14,45 @@ def make_teams(player_list, fairness_value, team_amount=2):
     # [(1, 4), (2, 3)]
     # So now we filter out all the groups with a member difference > 2
 
+
     valid_indexes = []
     for i in range(len(all_combinations)):
         if len(all_combinations[i][0]) >= int((len(player_list)/team_amount)):
             valid_indexes.append(i)
 
-    #each win-rate-difference corresponds to a valid_indexes with the same index
-    wr_diff = []
-    # look up how many points difference each of them has each combination at valid indexes
+    # each skill-diff corresponds to a valid_indexes with the same index
+    skill_diff = []
+    # look up how many points difference each of them has at valid indexes
     for index in valid_indexes:
-        for team_combination in all_combinations[index]:
-            for team in team_combination:
-                pass
+        wr_combination = []
+        idx_counter = 0
+        print(all_combinations[index])
+        for team in all_combinations[index]:
+            wr_combination.append(0)
+            for member in team:
+                player = Player.query.filter_by(name=member).first()
+                if player.played_matches < 5:
+                    wr_combination[idx_counter] += 50  # 50% win-rate with low matches
+                else:
+                    wr_combination[idx_counter] += int((player.won_matches / player.played_matches) * 100)
+            wr_combination[idx_counter] /= len(team)  # mean win-rate of current team
+            idx_counter += 1
 
+        # calculate difference between team-win-rates here
+        diffs = []
+        for i, e in enumerate(wr_combination):
+            for j, f in enumerate(wr_combination):
+                if i != j:
+                    diffs.append(abs(e - f))
+        skill_diff.append(sum(diffs)/len(diffs))
+
+    print(skill_diff)
     # also return win-rates!
+    most_balanced_team = min(skill_diff)
+    most_balanced_team_index = skill_diff.index(most_balanced_team)
 
-    return all_combinations[fairness_value][0], all_combinations[fairness_value][1]
+    return all_combinations[valid_indexes[most_balanced_team_index]][0], \
+           all_combinations[valid_indexes[most_balanced_team_index]][1]
 
 
 # Taken from SO: https://stackoverflow.com/a/39199937

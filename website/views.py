@@ -1,9 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify
-from flask_login import login_required, current_user
 from .models import Player
-from . import db
-from .utils import slice_n_dice as snd
-import json
+from . import db, slice_n_dice as snd
 
 views = Blueprint('views', __name__)
 
