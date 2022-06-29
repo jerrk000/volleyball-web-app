@@ -10,7 +10,12 @@ teamRed_current_match = []
 
 teamBlue_current_match = []
 
+win_rate_teamRed = 0
+
+win_rate_teamBlue = 0
+
 fairness_counter = 0
+
 
 #####################################################################
 # First page of website
@@ -21,8 +26,10 @@ def start():
     current_players.clear()
     teamRed_current_match.clear()
     teamBlue_current_match.clear()
-    global fairness_counter
+    global fairness_counter, win_rate_teamRed, win_rate_teamBlue
     fairness_counter = 0
+    win_rate_teamRed = 0
+    win_rate_teamBlue = 0
     players = Player.query.all()
     return render_template("start.html", players=players, current_players=current_players)
 
@@ -87,7 +94,7 @@ def team_building():
                 flash('Player already chosen.', category='error')
             else:
                 current_players.append(name)
-                #filter database ,without players from current_players
+                # filter database ,without players from current_players
                 players = Player.query.filter(Player.name.notin_(current_players))
                 # flash('Player added to game!', category='success')
                 return render_template("start.html", players=players, current_players=current_players)
@@ -110,16 +117,7 @@ def team_building():
 
 @views.route('/versus', methods=['GET', 'POST'])
 def versus():
-    global teamRed_current_match, teamBlue_current_match, fairness_counter
-    #
-    # if request.method == 'GET':
-    #     print("Got a get request")
-    #     global fairness_counter
-    #     fairness_counter += 1
-    #     teamRed_current_match.clear()
-    #     teamBlue_current_match.clear()
-    #     teamRed_current_match, teamBlue_current_match = snd.make_teams(current_players, fairness_counter, 2)
-    #     return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match)
+    global teamRed_current_match, teamBlue_current_match, fairness_counter, win_rate_teamRed, win_rate_teamBlue
 
     # TODO if this layout is used for multiple teams, change checks for min-teamsize
     if len(current_players) < 4:
@@ -138,9 +136,10 @@ def versus():
     fairness_counter += 1
     teamRed_current_match = teams[0]
     teamBlue_current_match = teams[1]
-    winrate_team_red = win_rates[0]
-    winrate_team_blue = win_rates[1]
-    return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match)
+    win_rate_teamRed = win_rates[0]
+    win_rate_teamBlue = win_rates[1]
+    return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match,
+                           winrateRed=win_rate_teamRed, winrateBlue=win_rate_teamBlue)
 
 
 ####################################################################
@@ -149,17 +148,41 @@ def versus():
 
 @views.route('/update-stats', methods=['POST'])
 def update_stats():
-    winning_team = request.form.get('newWin')
+    if request.method == 'POST':
 
-    if winning_team == 'winRed':
-        print("Red Team won, now updating")
-    elif winning_team == 'winBlue':
-        print("Blue Team won, now updating")
-    else:
-        flash("This functionality is not implemented!", category='error')
+        winning_team = request.form.get('newWin')
 
-    # we either have to re-render page here, or use fetch API
-    return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match)
+        winners = []
+        losers = []
+        if winning_team == 'winRed':
+            print("Red Team won, now updating")
+            winners = teamRed_current_match
+            losers = teamBlue_current_match
+        elif winning_team == 'winBlue':
+            print("Blue Team won, now updating")
+            winners = teamBlue_current_match
+            losers = teamRed_current_match
+        else:
+            flash("This functionality is not implemented!", category='error')
+            return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match,
+                                   winrateRed=win_rate_teamRed, winrateBlue=win_rate_teamBlue)
 
+        for winner_name in winners:
+            winner = Player.query.filter_by(name=winner_name).first()
+            # this updates the values on DB-side (prevents race conditions)
+            winner.played_matches = Player.played_matches + 1
+            winner.won_matches = Player.won_matches + 1
+        for loser_name in losers:
+            loser = Player.query.filter_by(name=loser_name).first()
+            loser.played_matches = Player.played_matches + 1
+            loser.lost_matches = Player.lost_matches + 1
+        db.session.commit()
+
+        # TODO update win_rate here
+        # TODO calculate not individual win-rate of team, but
+
+        # we either have to re-render page here, or use fetch API
+        return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match,
+                               winrateRed=win_rate_teamRed, winrateBlue=win_rate_teamBlue)
 
 #####################################################################

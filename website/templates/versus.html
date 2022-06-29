@@ -38,6 +38,7 @@
       {%  if teamRed|length < teamBlue|length %}
           <p>&nbsp;</p>
       {% endif %}
+      <p style="color:darkred">{{ winrateRed }}%</p>
     <form action="/update-stats" method="post">
         <button class="btn btn-primary" style="background-color: indianred; border-color: palevioletred" name="newWin" value="winRed">Winner: Team Red</button>
     </form>
@@ -47,6 +48,7 @@
     {% for player in teamBlue %}
         <p>{{ player }}</p>
       {% endfor %}
+    <p style="color: royalblue">{{ winrateBlue }}%</p>
     <form action="/update-stats" method="post">
         <button class="btn btn-primary" style="background-color: cornflowerblue" name="newWin" value="winBlue">Winner: Team Blue</button>
     </form>

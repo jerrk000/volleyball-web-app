@@ -46,16 +46,14 @@ def make_teams(player_list, fairness_value, team_amount=2):
         wr_combination.append(tmp_wr_combination.copy())
         skill_diff.append(sum(diffs) / len(diffs))
 
-    print(skill_diff)
+    # ignore the first fairness-value-1 fairer teams.
     fairness_value = fairness_value % len(skill_diff)
-    skill_diff_copy = skill_diff.copy()
-
     most_balanced_team = 0
     for i in range(fairness_value + 1):
-        most_balanced_team = min(skill_diff_copy)
-        most_balanced_team_index = skill_diff_copy.index(most_balanced_team)
+        most_balanced_team = min(skill_diff)
+        most_balanced_team_index = skill_diff.index(most_balanced_team)
         if i is not fairness_value:
-            del skill_diff_copy[most_balanced_team_index]  # del trashes the list value
+            skill_diff[most_balanced_team_index] = 101
 
     # most balanced team at the x-ed place (x = fairness-value)
     most_balanced_team_index = skill_diff.index(most_balanced_team)
