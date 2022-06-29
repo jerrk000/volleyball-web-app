@@ -10,6 +10,8 @@ teamRed_current_match = []
 
 teamBlue_current_match = []
 
+fairness_counter = 0
+
 #####################################################################
 # First page of website
 
@@ -19,6 +21,8 @@ def start():
     current_players.clear()
     teamRed_current_match.clear()
     teamBlue_current_match.clear()
+    global fairness_counter
+    fairness_counter = 0
     players = Player.query.all()
     return render_template("start.html", players=players, current_players=current_players)
 
@@ -106,20 +110,36 @@ def team_building():
 
 @views.route('/versus', methods=['GET', 'POST'])
 def versus():
+    global teamRed_current_match, teamBlue_current_match, fairness_counter
+    #
+    # if request.method == 'GET':
+    #     print("Got a get request")
+    #     global fairness_counter
+    #     fairness_counter += 1
+    #     teamRed_current_match.clear()
+    #     teamBlue_current_match.clear()
+    #     teamRed_current_match, teamBlue_current_match = snd.make_teams(current_players, fairness_counter, 2)
+    #     return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match)
+
     # TODO if this layout is used for multiple teams, change checks for min-teamsize
     if len(current_players) < 4:
         flash('At least four players needed', category='error')
         players = Player.query.filter(Player.name.notin_(current_players))
         return render_template("start.html", players=players, current_players=current_players)
 
-    if len(current_players) > 12: # TODO change this check when implementing multiple teams
+    if len(current_players) > 12:  # TODO change this check when implementing multiple teams
         flash('No more than 12 players allowed', category='error')
         players = Player.query.filter(Player.name.notin_(current_players))
         return render_template("start.html", players=players, current_players=current_players)
 
-    global teamRed_current_match, teamBlue_current_match
-    teamRed_current_match, teamBlue_current_match = snd.make_teams(current_players, 0, 2)
-
+    teams, win_rates = snd.make_teams(current_players, fairness_counter, 2)
+    print(teams)
+    print(fairness_counter)
+    fairness_counter += 1
+    teamRed_current_match = teams[0]
+    teamBlue_current_match = teams[1]
+    winrate_team_red = win_rates[0]
+    winrate_team_blue = win_rates[1]
     return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match)
 
 

@@ -2,7 +2,6 @@ from .models import Player
 
 
 def make_teams(player_list, fairness_value, team_amount=2):
-
     all_combinations = sorted_k_partitions(player_list, team_amount)
     # this yields all combinations, so a list of [1,2,3,4] partitioned in two partitions gives us:
     # [(1,), (2, 3, 4)]
@@ -14,45 +13,56 @@ def make_teams(player_list, fairness_value, team_amount=2):
     # [(1, 4), (2, 3)]
     # So now we filter out all the groups with a member difference > 2
 
-
     valid_indexes = []
     for i in range(len(all_combinations)):
-        if len(all_combinations[i][0]) >= int((len(player_list)/team_amount)):
+        if len(all_combinations[i][0]) >= int((len(player_list) / team_amount)):
             valid_indexes.append(i)
 
     # each skill-diff corresponds to a valid_indexes with the same index
     skill_diff = []
+    wr_combination = []
     # look up how many points difference each of them has at valid indexes
     for index in valid_indexes:
-        wr_combination = []
+        tmp_wr_combination = []
         idx_counter = 0
         print(all_combinations[index])
         for team in all_combinations[index]:
-            wr_combination.append(0)
+            tmp_wr_combination.append(0)
             for member in team:
                 player = Player.query.filter_by(name=member).first()
                 if player.played_matches < 5:
-                    wr_combination[idx_counter] += 50  # 50% win-rate with low matches
+                    tmp_wr_combination[idx_counter] += 50  # 50% win-rate with low matches
                 else:
-                    wr_combination[idx_counter] += int((player.won_matches / player.played_matches) * 100)
-            wr_combination[idx_counter] /= len(team)  # mean win-rate of current team
+                    tmp_wr_combination[idx_counter] += int((player.won_matches / player.played_matches) * 100)
+            tmp_wr_combination[idx_counter] /= len(team)  # mean win-rate of current team
             idx_counter += 1
 
         # calculate difference between team-win-rates here
         diffs = []
-        for i, e in enumerate(wr_combination):
-            for j, f in enumerate(wr_combination):
+        for i, e in enumerate(tmp_wr_combination):
+            for j, f in enumerate(tmp_wr_combination):
                 if i != j:
                     diffs.append(abs(e - f))
-        skill_diff.append(sum(diffs)/len(diffs))
+        wr_combination.append(tmp_wr_combination.copy())
+        skill_diff.append(sum(diffs) / len(diffs))
 
     print(skill_diff)
-    # also return win-rates!
-    most_balanced_team = min(skill_diff)
+    fairness_value = fairness_value % len(skill_diff)
+    skill_diff_copy = skill_diff.copy()
+
+    most_balanced_team = 0
+    for i in range(fairness_value + 1):
+        most_balanced_team = min(skill_diff_copy)
+        most_balanced_team_index = skill_diff_copy.index(most_balanced_team)
+        if i is not fairness_value:
+            del skill_diff_copy[most_balanced_team_index]  # del trashes the list value
+
+    # most balanced team at the x-ed place (x = fairness-value)
     most_balanced_team_index = skill_diff.index(most_balanced_team)
 
-    return all_combinations[valid_indexes[most_balanced_team_index]][0], \
-           all_combinations[valid_indexes[most_balanced_team_index]][1]
+    # return list of lists of most fair team, and the mean-win-rates of these teams
+    return [list(elem) for elem in all_combinations[valid_indexes[most_balanced_team_index]]], \
+           wr_combination[most_balanced_team_index]
 
 
 # Taken from SO: https://stackoverflow.com/a/39199937
