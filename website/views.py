@@ -131,13 +131,13 @@ def versus():
         return render_template("start.html", players=players, current_players=current_players)
 
     teams, win_rates = snd.make_teams(current_players, fairness_counter, 2)
-    print(teams)
-    print(fairness_counter)
+    # print(teams)
+    # print(fairness_counter)
     fairness_counter += 1
     teamRed_current_match = teams[0]
     teamBlue_current_match = teams[1]
-    win_rate_teamRed = win_rates[0]
-    win_rate_teamBlue = win_rates[1]
+    win_rate_teamRed = win_rates[0]  # TODO round after comma
+    win_rate_teamBlue = win_rates[1]  # TODO round after comma
     return render_template("versus.html", teamRed=teamRed_current_match, teamBlue=teamBlue_current_match,
                            winrateRed=win_rate_teamRed, winrateBlue=win_rate_teamBlue)
 

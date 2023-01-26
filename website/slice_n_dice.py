@@ -58,9 +58,30 @@ def make_teams(player_list, fairness_value, team_amount=2):
     # most balanced team at the x-ed place (x = fairness-value)
     most_balanced_team_index = skill_diff.index(most_balanced_team)
 
+    # transform the individual win-rates into a contrast of two win-rates
+    transformed_win_rate = contrast_win_rates(wr_combination[most_balanced_team_index])
+
     # return list of lists of most fair team, and the mean-win-rates of these teams
-    return [list(elem) for elem in all_combinations[valid_indexes[most_balanced_team_index]]], \
-           wr_combination[most_balanced_team_index]
+    return [list(elem) for elem in all_combinations[valid_indexes[most_balanced_team_index]]], transformed_win_rate
+
+
+def contrast_win_rates(two_win_rates):
+    # contrast each win-rate by calculating: desired/possible outcomes
+    # so that it is not 30% vs 40%, instead 41% vs 59% (in sum 100%) the real probability for a win.
+    win_rate_0 = 100 * (two_win_rates[0] * (100 - two_win_rates[1]) / \
+                 (two_win_rates[0] * (100 - two_win_rates[1]) + two_win_rates[1] * (100 - two_win_rates[0])))
+    win_rate_1 = 100 * (two_win_rates[1] * (100 - two_win_rates[0]) / \
+                 (two_win_rates[1] * (100 - two_win_rates[0]) + two_win_rates[0] * (100 - two_win_rates[1])))
+
+    # get the bigger number and round it up, round down the other one
+    if int((win_rate_0 - int(win_rate_0)) * 10) >= 5 and int((win_rate_1 - int(win_rate_1)) * 10) < 5:
+        win_rate_0 = int(win_rate_0) + 1
+        win_rate_1 = int(win_rate_1)
+    elif int((win_rate_1 - int(win_rate_1)) * 10) >= 5 and int((win_rate_0 - int(win_rate_0)) * 10) < 5:
+        win_rate_1 = int(win_rate_1) + 1
+        win_rate_0 = int(win_rate_0)
+
+    return [win_rate_0, win_rate_1]
 
 
 # Taken from SO: https://stackoverflow.com/a/39199937
