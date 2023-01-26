@@ -19,7 +19,8 @@ def create_app():
 
     from .models import Player
 
-    create_database(app)
+    with app.app_context():
+        db.create_all()
 
     return app
 
