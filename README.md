@@ -12,6 +12,14 @@ git clone <repo-url>
 pip install -r requirements.txt
 ```
 
+## Activating/deactivating venv
+
+```bash
+source venv/bin/activate
+```
+```bash
+source deactivate
+```
 ## Running The App
 
 ```bash
