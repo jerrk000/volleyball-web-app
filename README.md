@@ -45,3 +45,8 @@ Go to `http://127.0.0.1:5000`
 source deactivate
 ```
 
+### Or on windows
+```bash
+deactivate
+```
+
